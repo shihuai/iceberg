@@ -109,7 +109,6 @@ def read_data(file_path=None, height=0, width=0, train_mode=False):
                              x_band2[:, :, :, np.newaxis],
                              ((x_band1 + x_band2) / 2)[:, :, :, np.newaxis]],
                              axis=-1)
-    imgs = denoise(imgs, weight=0.05, multichannel=True)
     angle = np.array(df.inc_angle)
 
     if height != 0 and width != 0:
@@ -120,6 +119,7 @@ def read_data(file_path=None, height=0, width=0, train_mode=False):
     else:
         y_train = None
 
-    imgs = reduce_mean(imgs)
+    imgs = denoise(imgs, weight=0.05, multichannel=True)
+    # imgs = reduce_mean(imgs)
 
     return df['id'], imgs, angle, y_train
