@@ -99,7 +99,7 @@ def conv_block(input_tensor, kernel_size, filters, stage, block, strides=(2, 2))
 
 
 def get_model(input_shape1=[75, 75, 3], input_shape2=[1], lr=1e-2,
-            trainable=True, weights=None):
+            trainable=True, weights=None, optimizers='adam'):
     """Instantiates the ResNet50 architecture.
     Optionally loads weights pre-trained
     on ImageNet. Note that when using TensorFlow,
@@ -195,10 +195,12 @@ def get_model(input_shape1=[75, 75, 3], input_shape2=[1], lr=1e-2,
     branch_2 = BatchNormalization()(branch_2)
 
     x = (Concatenate()([branch_1, branch_2]))
-    x = Dropout(0.6)(x)
-    x = Dense(4096, activation='relu', kernel_regularizer=kernel_regularizer)(x)
-    x = Dropout(0.6)(x)
-    # x = GlobalMaxPooling2D()(x)
+    # x = branch_1
+    x = Dropout(0.5)(x)
+    x = Dense(2048, activation='relu', kernel_regularizer=kernel_regularizer)(x)
+    x = Dropout(0.5)(x)
+    x = Dense(2048, activation='relu', kernel_regularizer=kernel_regularizer)(x)
+    x = Dropout(0.5)(x)
 
     # Ensure that the model takes into account
     # any potential predecessors of `input_tensor`.
@@ -206,8 +208,11 @@ def get_model(input_shape1=[75, 75, 3], input_shape2=[1], lr=1e-2,
 
     # model = Model([img_input, angle_input], output)
     model = Model(img_input, output)
-    optimizer = Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=1e-8, decay=0.0)
-    # optimizer = SGD(lr=lr, momentum=0.9, decay=5*1e-5, nesterov=True)
+    if optimizers == 'adam':
+        optimizer = Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=1e-8)
+    elif optimizers == 'sgd':
+        optimizer = SGD(lr=lr, momentum=0.9, decay=5*1e-5, nesterov=True)
+
     model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
     if weights is not None:
