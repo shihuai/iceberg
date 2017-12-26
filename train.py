@@ -2,6 +2,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from models import VGG16, model, ResNet50
 from tools.preprocess_img import read_data, data_augment
 from sklearn.model_selection import train_test_split
+from models.callback_functions import get_callbacks
 
 # height = 75
 # width = 75
@@ -73,21 +74,21 @@ if __name__=="__main__":
     print X_train[0, :, :, 0]
     datagen = ImageDataGenerator(horizontal_flip=True,
                                  vertical_flip=True,
-                                 width_shift_range=0.,
-                                 height_shift_range=0.,
-                                 channel_shift_range=0,
+                                 width_shift_range=0.2,
+                                 height_shift_range=0.2,
                                  zoom_range=0.2,
-                                 rotation_range=10)
+                                 rotation_range=20)
 
     file_path = "./model_weights_1.hdf5"
     pre_trained_model = './pre_models/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
-    callbacks = VGG16.get_callbacks(file_path)
+    callbacks = get_callbacks(file_path)
     train_models(file_path,
                  ResNet50.get_model(input_shape1=[height, width, 3],
-                                 input_shape2=[1], lr=1e-5,
+                                 input_shape2=[1], lr=1e-4,
                                  trainable=True,
-                                 weights=pre_trained_model),
-                 datagen, 50, 16,
+                                 weights=pre_trained_model,
+                                 optimizers='adam'),
+                 datagen, 100, 16,
                  (X_train, y_train),
                  (X_valid, y_valid))
 
@@ -106,10 +107,11 @@ if __name__=="__main__":
     # pre_trained_model = './model_weights_1.hdf5'
     # callbacks = VGG16.get_callbacks(file_path)
     # train_models(file_path,
-    #              VGG16.get_model(input_shape1=[height, width, 3],
+    #              ResNet50.get_model(input_shape1=[height, width, 3],
     #                              input_shape2=[1], lr=1e-5,
     #                              trainable=True,
-    #                              weights=pre_trained_model),
+    #                              weights=pre_trained_model,
+    #                              optimizers='sgd'),
     #              datagen, 40, 32,
     #              (X_train, y_train),
     #              (X_valid, y_valid))
