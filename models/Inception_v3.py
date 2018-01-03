@@ -291,17 +291,19 @@ def get_model(input_shape1=[75, 75, 3], input_shape2=[1], lr=1e-2,
             axis=channel_axis,
             name='mixed' + str(9 + i))
     branch_1 = GlobalAveragePooling2D()(x)
-    branch_1 = BatchNormalization()(branch_1)
-    branch_2 = GlobalMaxPooling2D()(x)
-    branch_2 = BatchNormalization()(branch_2)
+    # branch_1 = BatchNormalization()(branch_1)
+    # branch_2 = GlobalMaxPooling2D()(x)
+    # branch_2 = BatchNormalization()(branch_2)
+    x = Dropout(0.5)(branch_1)
 
-    x = (Concatenate()([branch_1, branch_2]))
-    # x = branch_2
-    x = Dropout(0.4)(x)
-    x = Dense(2048, activation='relu', kernel_regularizer=kernel_regularizer)(x)
-    x = Dropout(0.4)(x)
-    x = Dense(2048, activation='relu', kernel_regularizer=kernel_regularizer)(x)
-    x = Dropout(0.4)(x)
+    #
+    # x = (Concatenate()([branch_1, branch_2]))
+    # x = branch_1
+    # x = Dropout(0.5)(x)
+    # x = Dense(2048, activation='relu', kernel_regularizer=kernel_regularizer)(x)
+    # x = Dropout(0.5)(x)
+    # x = Dense(2048, activation='relu', kernel_regularizer=kernel_regularizer)(x)
+    # x = Dropout(0.5)(x)
 
     # Ensure that the model takes into account
     # any potential predecessors of `input_tensor`.
