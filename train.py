@@ -1,49 +1,9 @@
-from keras.preprocessing.image import ImageDataGenerator
-from models import VGG16, model, ResNet50
+from tools.get_image_generator import get_image_generator
+from models import VGG16, model, ResNet50, Inception_v3, DensNet121, ResNet101, ResNet101_v2
 from tools.preprocess_img import read_data, data_augment
 from sklearn.model_selection import train_test_split
 from models.callback_functions import get_callbacks
 
-# height = 75
-# width = 75
-# train_mode = True
-# file_list, X_train, X_angle_train, y_train = read_data('data/train.json',
-#                                             height=height, width=width,
-#                                             train_mode=True)
-# X_train, X_valid, X_angle_train, X_angle_valid, y_train, y_valid = train_test_split(X_train,
-#                                                                                     X_angle_train,
-#                                                                                     y_train,
-#                                                                                     random_state=123,
-#                                                                                     train_size=0.75)
-# # X_train, X_angle_train, y_train = data_augment(X_train, X_angle_train, y_train)
-# print X_train.shape
-# print X_valid.shape
-#
-# file_path = './model_weights.hdf5'
-# # pre_trained_model = './model_weights.hdf5'
-# pre_trained_model = './pre_models/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'
-# callbacks = get_callbacks(file_path=file_path, patience=5)
-# model = get_model(input_shape1=[height, width, 3],
-#                   input_shape2=[1],
-#                   weights=pre_trained_model)
-#
-# datagen = ImageDataGenerator(horizontal_flip=True,
-#                                  vertical_flip=True,
-#                                  width_shift_range=0.,
-#                                  height_shift_range=0.,
-#                                  channel_shift_range=0,
-#                                  zoom_range=0.2,
-#                                  rotation_range=10)
-#
-# model.fit_generator(datagen.flow(X_train, y_train, batch_size=32),
-#                     epochs=30, steps_per_epoch=len(X_train) / 32,
-#                     validation_data=(X_valid, y_valid),
-#                     verbose=1, callbacks=callbacks)
-#
-# # model.fit([X_train, X_angle_train], y_train,
-# #           epochs=25, batch_size=16,
-# #           validation_data=([X_valid, X_angle_valid], y_valid),
-# #           callbacks=callbacks)
 
 def train_models(file_path, model, datagen, epoches, batch_size, train_data, valied_data):
     X_train, y_train = train_data
@@ -63,7 +23,7 @@ if __name__=="__main__":
     file_list, X_train, X_angle_train, y_train = read_data('data/train.json',
                                             height=height, width=width,
                                             train_mode=True)
-    print y_train.sum()
+    # print y_train.sum()
     X_train, X_valid, X_angle_train, X_angle_valid, y_train, y_valid = train_test_split(X_train,
                                                                                         X_angle_train,
                                                                                         y_train,
@@ -72,23 +32,25 @@ if __name__=="__main__":
     print X_train.shape
     print X_valid.shape
     print X_train[0, :, :, 0]
-    datagen = ImageDataGenerator(horizontal_flip=True,
+
+    datagen = get_image_generator(horizontal_flip=True,
                                  vertical_flip=True,
-                                 width_shift_range=0.2,
-                                 height_shift_range=0.2,
+                                 width_shift_range=0.0,
+                                 height_shift_range=0.0,
+                                 # zca_whitening=True,
                                  zoom_range=0.2,
                                  rotation_range=20)
 
     file_path = "./model_weights_1.hdf5"
-    pre_trained_model = './pre_models/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
+    pre_trained_model = './pre_models/resnet101_weights_tf.h5'
     callbacks = get_callbacks(file_path)
     train_models(file_path,
-                 ResNet50.get_model(input_shape1=[height, width, 3],
+                 ResNet101_v2.get_model(input_shape1=[height, width, 3],
                                  input_shape2=[1], lr=1e-4,
                                  trainable=True,
                                  weights=pre_trained_model,
                                  optimizers='adam'),
-                 datagen, 100, 16,
+                 datagen, 50, 16,
                  (X_train, y_train),
                  (X_valid, y_valid))
 
@@ -105,13 +67,13 @@ if __name__=="__main__":
     # finetune all the layer of CNN
     # file_path = "./model_weights_2.hdf5"
     # pre_trained_model = './model_weights_1.hdf5'
-    # callbacks = VGG16.get_callbacks(file_path)
+    # callbacks = get_callbacks(file_path)
     # train_models(file_path,
     #              ResNet50.get_model(input_shape1=[height, width, 3],
     #                              input_shape2=[1], lr=1e-5,
     #                              trainable=True,
     #                              weights=pre_trained_model,
-    #                              optimizers='sgd'),
+    #                              optimizers='adam'),
     #              datagen, 40, 32,
     #              (X_train, y_train),
     #              (X_valid, y_valid))
